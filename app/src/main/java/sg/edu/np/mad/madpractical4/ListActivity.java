@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -11,57 +12,63 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ListActivity extends AppCompatActivity {
+import android.net.wifi.p2p.WifiP2pManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-    // Declare the ArrayList to store User objects
-    private ArrayList<User> userList = new ArrayList<>();
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+
+public class ListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_list);
-        //generate and add 20 random users to the list
-        generateRandomUsers(20);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        ImageView mainimage = findViewById(R.id.mainimage);
+        //create a list of 20 random users
+        ArrayList<User> myUser_List = new ArrayList<>();
+        for (int i =0; i < 20; i++){
+            int name = new Random().nextInt(999999999);
+            int description = new Random().nextInt(999999999);
+            boolean followed = new Random().nextBoolean();
 
-        mainimage.setOnClickListener(new View.OnClickListener() {
+            User user = new User("John Doe", "MAD Developer", 1, false);
+            user.setName("Name"+String.valueOf(name));
+            user.setDescription("Description"+String.valueOf(description));
+            user.setFollowed(followed);
+            myUser_List.add(user);
+        }
+
+        //add recyclerview
+        UserAdapter userAdapter= new UserAdapter(myUser_List, this);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(userAdapter);
+
+        ImageView smallimage = findViewById(R.id.SmallImage);
+
+        smallimage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showAlertDialog();}
         });
-    }
-
-    //Generate random users and add them to the userList
-    private void generateRandomUsers(int numUsers) {
-        Random random = new Random();
-        String[] names = {"Alice", "Bob", "Charlie", "David", "Emily", "Fiona", "George", "Henry", "Isabella", "Jack"};
-        String[] descriptions = {"Gamer", "Musician", "Artist", "Athlete", "Programmer", "Doctor", "Lawyer", "Teacher", "Student", "Entrepreneur"};
-
-        for (int i = 0; i < numUsers; i++) {
-            String name = names[random.nextInt(names.length)];
-            String description = descriptions[random.nextInt(descriptions.length)];
-            boolean followed = random.nextBoolean(); // Generate random boolean for Followed
-            int randomId = generateRandomId(); // Call new method to generate ID
-
-            User user = new User(name, description, randomId, followed);
-            userList.add(user);
-        }
-    }
-
-    //Generate a random unique ID (basic implementation)
-    private int generateRandomId() {
-        return new Random().nextInt(Integer.MAX_VALUE); // Generate a random int within integer range
     }
 
     // Method to show the AlertDialog
